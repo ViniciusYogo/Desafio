@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Visualizar Alunos</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .table-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">VISUALIZAR ALUNOS</h1>
+        
+        <div id="loading" class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p>Carregando lista de alunos...</p>
+        </div>
+
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="tabela-alunos">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">NOME</th>
+                        <th scope="col">NOTA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error-message');
+            const tabelaBody = document.querySelector('#tabela-alunos tbody');
+
+            try {
+                const response = await fetch('/students');
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao carregar alunos');
+                }
+                
+                const alunos = await response.json();
+                
+                // Limpa a tabela antes de adicionar novos dados
+                tabelaBody.innerHTML = '';
+
+                alunos.forEach(aluno => {
+                    const row = document.createElement('tr');
+                    
+                    const notaFormatada = aluno.nota !== null ? parseFloat(aluno.nota).toFixed(1) : 'N/A';
+                    
+                    row.innerHTML = `
+                        <td>${aluno.id}</td>
+                        <td>${aluno.nome}</td>
+                        <td>${notaFormatada}</td>
+                    `;
+                    
+                    tabelaBody.appendChild(row);
+                });
+
+                // Esconde o loading após carregar
+                loadingElement.style.display = 'none';
+
+            } catch (error) {
+                console.error('Erro:', error);
+                loadingElement.style.display = 'none';
+                errorElement.textContent = error.message;
+                errorElement.style.display = 'block';
+                tabelaBody.innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alunos</title>
+</head>
+
+<style>
+    body {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        min-height: 100vh;
+        min-width: 100%;
+        justify-content: center;
+        background: url("https://user-images.githubusercontent.com/39142850/67110554-fdea5400-f20d-11e9-834a-d459a612b7b1.gif");
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    form {
+        color: #fff;
+        height: 350px;
+        width: 250px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 2px;
+        border: 2px solid black;
+        border-radius: 15px;
+        backdrop-filter: blur(15px);
+    }
+
+    h1 {
+        display: flex;
+        justify-content: center;
+    }
+
+    input {
+        width: 80%;
+        height: 25px;
+        border-radius: 15px;
+        border: transparent;
+        outline: none;
+    }
+
+    input:focus {
+        background-color: rgb(248, 248, 248);
+    }
+    
+</style>
+
+
+<body>
+
+
+    <form id="formAluno">
+        <h2>Cadastro de notas</h2>
+        <input type="text" id="nomeInput" required>
+        <br>
+        <input type="text" id="notaInput" required>
+
+        <br><br>
+
+        <button type="submit">Enviar</button>
+        <br>
+        <div id="mensagem"></div>
+    </form>
+
+
+    <script>
+        document.getElementById('formAluno').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const nome = document.getElementById('nomeInput').value;
+            const nota = document.getElementById('notaInput').value;
+
+            // Validações básicas
+            if (!nome.trim()) {
+                mostrarMensagem('Por favor, insira o nome do aluno', 'erro');
+                return;
+            }
+
+            if (nota < 0 || nota > 10) {
+                mostrarMensagem('A nota deve estar entre 0 e 10', 'erro');
+                return;
+            }
+
+            try {
+                const resposta = await fetch('/students', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        nota: parseFloat(nota)
+                    })
+                });
+
+                const resultado = await resposta.json();
+
+                if (resposta.ok) {
+                    mostrarMensagem('Aluno cadastrado com sucesso! ID: ' + resultado.alunoId, 'sucesso');
+                    document.getElementById('formAluno').reset();
+                } else {
+                    mostrarMensagem('Erro: ' + resultado.error, 'erro');
+                }
+            } catch (erro) {
+                mostrarMensagem('Erro na comunicação com o servidor', 'erro');
+                console.error('Erro:', erro);
+            }
+        });
+
+        function mostrarMensagem(texto, tipo) {
+            const divMensagem = document.getElementById('mensagem');
+            divMensagem.textContent = texto;
+            divMensagem.className = tipo;
+        }
+    </script>
+</body>
+
+</html>
