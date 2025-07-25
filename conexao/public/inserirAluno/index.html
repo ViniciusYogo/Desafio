@@ -11,6 +11,8 @@
     body {
         margin: 0;
         display: flex;
+        flex-direction: column;
+        gap: 30px;
         align-items: center;
         min-height: 100vh;
         min-width: 100%;
@@ -50,11 +52,32 @@
     input:focus {
         background-color: rgb(248, 248, 248);
     }
-    
+
+    .sucesso {
+        color: lightgreen;
+        font-weight: bold;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .erro {
+        color: red;
+        font-weight: bold;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    button {
+        height: 35px;
+
+        border-radius: 15px;
+        background-color: aqua;
+    }
 </style>
 
 
 <body>
+
 
 
     <form id="formAluno">
@@ -70,49 +93,57 @@
         <div id="mensagem"></div>
     </form>
 
+    <a href="/visualizarAluno">
+        <button>Visualizar alunos</button>
+    </a>
 
     <script>
-        document.getElementById('formAluno').addEventListener('submit', async function (e) {
-            e.preventDefault();
 
-            const nome = document.getElementById('nomeInput').value;
-            const nota = document.getElementById('notaInput').value;
-
-            // Validações básicas
-            if (!nome.trim()) {
-                mostrarMensagem('Por favor, insira o nome do aluno', 'erro');
-                return;
-            }
-
-            if (nota < 0 || nota > 10) {
-                mostrarMensagem('A nota deve estar entre 0 e 10', 'erro');
-                return;
-            }
-
-            try {
-                const resposta = await fetch('/students', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nome: nome,
-                        nota: parseFloat(nota)
-                    })
-                });
-
-                const resultado = await resposta.json();
-
-                if (resposta.ok) {
-                    mostrarMensagem('Aluno cadastrado com sucesso! ID: ' + resultado.alunoId, 'sucesso');
-                    document.getElementById('formAluno').reset();
-                } else {
-                    mostrarMensagem('Erro: ' + resultado.error, 'erro');
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('formAluno').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                
+                const nome = document.getElementById('nomeInput').value;
+                const nota = document.getElementById('notaInput').value;
+                
+                // Validações básicas
+                if (!nome.trim()) {
+                    mostrarMensagem('Por favor, insira o nome do aluno', 'erro');
+                    return;
                 }
-            } catch (erro) {
-                mostrarMensagem('Erro na comunicação com o servidor', 'erro');
-                console.error('Erro:', erro);
-            }
+
+                if (nota < 0 || nota > 10) {
+                    mostrarMensagem('A nota deve estar entre 0 e 10', 'erro');
+                    return;
+                }
+                
+                try {
+                    const resposta = await fetch('/students', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            nome: nome,
+                            nota: parseFloat(nota)
+                        })
+                        
+                    });
+                    const resultado = await resposta.json();
+                    
+                    
+                    if (resposta.ok) {
+                        console.log("DOM carregado, script ativo");
+                        mostrarMensagem('Aluno cadastrado com sucesso! ID: ', 'sucesso');
+                        document.getElementById('formAluno').reset();
+                    } else {
+                        mostrarMensagem('Erro: ' + resultado.error, 'erro');
+                    }
+                } catch (erro) {
+                    mostrarMensagem('Erro na comunicação com o servidor', 'erro');
+                    console.error('Erro:', erro);
+                }
+            });
         });
 
         function mostrarMensagem(texto, tipo) {

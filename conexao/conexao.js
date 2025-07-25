@@ -94,16 +94,7 @@ app.get('/students', async (req, res) => {
 });
 
 
-function pegarPrimeiroNome(nome){
-    const minusculo = nome.toLowerCase().split('');
 
-    for (let i = 1 ; i < minusculo.length; i++){
-      if (minutsculo[0] == minusculo[i]){
-        nome = "'-'"
-      }
-    
-    }
-}
 
 
 
