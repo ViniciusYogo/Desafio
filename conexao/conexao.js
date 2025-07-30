@@ -47,36 +47,56 @@ app.get('/visualizarAluno', (req, res) => {
 
 // Envio de alunos para o banco
 
-app.post('/students', (req, res) => {
+// Rota de cadastro - Versão corrigida
+app.post('/students/cadastro', async (req, res) => {
+
   const { nome, nota } = req.body;
-
   const notaNumber = parseFloat(nota);
-
 
   // Validações
   if (!nome || typeof nome !== 'string' || nome.trim() === '') {
-    return res.status(400).json({ error: 'Nome inválido' });
+    console.log('Erro: Nome inválido');
+    return res.status(400).json({
+      status: 'error',
+      error: 'Nome inválido'
+    });
   }
 
-
-  if (notaNumber < 0 || notaNumber > 10) {
-    return res.status(400).json({ error: 'Nota deve estar entre 0 e 10' });
+  if (isNaN(notaNumber) || notaNumber < 0 || notaNumber > 10) {
+    console.log('Erro: Nota inválida');
+    return res.status(400).json({
+      status: 'error',
+      error: 'Nota deve estar entre 0 e 10'
+    });
   }
 
-  conexao.query(
-    'INSERT INTO alunos (nome, nota) VALUES (?, ?)',
-    [nome.trim(), notaNumber],
-    //err -> msg erro result-> sucesso
-    (err, result) => {
-      if (err) return res.status(500).send('Erro no banco de dados');
-      res.status(201).json({
-        success: true,
-        message: "Aluno cadastrado com sucesso",
-        alunoId: result.insertId
-      });
-    }
-  );
+  try {
+    const [result] = await conexao.execute(
+      'INSERT INTO alunos (nome, nota) VALUES (?, ?)',
+      [nome.trim(), notaNumber]
+    );
+
+
+    return res.status(201).json({
+      status: 'success',
+      message: 'Aluno cadastrado com sucesso',
+      data: {
+        id: result.insertId,
+        nome: nome.trim(),
+        nota: notaNumber
+      }
+    });
+
+  } catch (err) {
+    console.error('Erro no banco de dados:', err);
+    return res.status(500).json({
+      status: 'error',
+      error: 'Erro no banco de dados',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
 });
+
 
 
 // API - Listar alunos

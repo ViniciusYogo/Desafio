@@ -102,10 +102,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('formAluno').addEventListener('submit', async function (e) {
                 e.preventDefault();
-                
+
                 const nome = document.getElementById('nomeInput').value;
                 const nota = document.getElementById('notaInput').value;
-                
+
                 // Validações básicas
                 if (!nome.trim()) {
                     mostrarMensagem('Por favor, insira o nome do aluno', 'erro');
@@ -116,9 +116,9 @@
                     mostrarMensagem('A nota deve estar entre 0 e 10', 'erro');
                     return;
                 }
-                
+
                 try {
-                    const resposta = await fetch('/students', {
+                    const resposta = await fetch('/students/cadastro', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -127,18 +127,17 @@
                             nome: nome,
                             nota: parseFloat(nota)
                         })
-                        
                     });
+
                     const resultado = await resposta.json();
-                    
-                    
+
                     if (resposta.ok) {
-                        console.log("DOM carregado, script ativo");
-                        mostrarMensagem('Aluno cadastrado com sucesso! ID: ', 'sucesso');
+                        mostrarMensagem(resultado.message , ' sucesso');
                         document.getElementById('formAluno').reset();
                     } else {
-                        mostrarMensagem('Erro: ' + resultado.error, 'erro');
+                        mostrarMensagem('Erro: ' + (resultado.error || resultado.message), 'erro');
                     }
+
                 } catch (erro) {
                     mostrarMensagem('Erro na comunicação com o servidor', 'erro');
                     console.error('Erro:', erro);
